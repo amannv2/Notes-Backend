@@ -5,8 +5,10 @@ const app = express();
 var date = new Date();
 
 // get all notes
-app.get('/notes', async (req, res) => {
-  const notes = await noteModel.find({});
+app.get('/notes/:user', async (req, res) => {
+  const user = req.params.user.trim();
+  const notes = await noteModel.find({ owner: user });
+  console.log(JSON.stringify(notes));
 
   try {
     console.log(date.toLocaleString() + ': Retrieving all notes.');
