@@ -25,6 +25,10 @@ const NoteSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  archived: {
+    type: Boolean,
+    default: false,
+  },
   owner: {
     type: String,
     required: true,
