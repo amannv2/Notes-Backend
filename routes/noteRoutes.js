@@ -1,35 +1,48 @@
 const express = require('express');
+const common = require('../common');
 const noteModel = require('../models/noteSchema');
+
 const app = express();
 
 var date = new Date();
 
 // get all notes
-app.get('/notes/:user', async (req, res) => {
+app.post('/notes/:user', async (req, res) => {
   const user = req.params.user.trim();
+  const pass = req.body.pass;
   const notes = await noteModel.find({ owner: user });
-  console.log(JSON.stringify(notes));
+  // console.log(JSON.stringify(notes));
 
-  try {
-    console.log(date.toLocaleString() + ': Retrieving all notes.');
-    res.send(notes);
-  } catch (err) {
-    console.log(date.toLocaleString() + ': Error in retrieving all notes.');
-    res.status(500).send(err);
+  if ((await common.authenticate(user, pass)) === false) {
+    res.status(401).send('Not authorized');
+  } else {
+    try {
+      console.log(date.toLocaleString() + ': Retrieving all notes.');
+      res.send(notes);
+    } catch (err) {
+      console.log(date.toLocaleString() + ': Error in retrieving all notes.');
+      res.status(500).send(err);
+    }
   }
 });
 
 // add new note
-app.post('/notes', async (req, res) => {
-  const note = new noteModel(req.body);
+app.post('/note/:user', async (req, res) => {
+  const note = new noteModel(req.body.note);
+  const user = req.params.user.trim();
+  const pass = req.body.pass;
 
-  try {
-    console.log(date.toLocaleString() + ': Adding a new note: ' + JSON.stringify(req.body));
-    await note.save();
-    res.send(note);
-  } catch (err) {
-    console.log(date.toLocaleString() + ': Error in adding a new note: ' + err);
-    res.status(500).send(err);
+  if ((await common.authenticate(user, pass)) === false) {
+    res.status(401).send('Not authorized');
+  } else {
+    try {
+      console.log(date.toLocaleString() + ': Adding a new note: ' + note._id);
+      await note.save();
+      res.send(note);
+    } catch (err) {
+      console.log(date.toLocaleString() + ': Error in adding a new note: ' + err);
+      res.status(500).send(err);
+    }
   }
 });
 
@@ -48,21 +61,22 @@ app.delete('/note/:id', async (req, res) => {
 });
 
 // update a note
-app.patch('/note/:id', async (req, res) => {
-  try {
-    console.log(
-      date.toLocaleString() +
-        ': Updating note: ' +
-        req.params.id +
-        '. Body: ' +
-        JSON.stringify(req.body)
-    );
-    const note = await noteModel.findByIdAndUpdate(req.params.id, req.body);
-    await note.save();
-    res.status(200).send(note);
-  } catch (err) {
-    console.log(date.toLocaleString() + ': Error in updating note: ' + err);
-    res.status(500).send(err);
+app.patch('/note/:id/:user', async (req, res) => {
+  const user = req.params.user.trim();
+  const pass = req.body.pass;
+
+  if ((await common.authenticate(user, pass)) === false) {
+    res.status(401).send('Not authorized');
+  } else {
+    try {
+      console.log(date.toLocaleString() + ': Updating note: ' + req.params.id + '.');
+      const note = await noteModel.findByIdAndUpdate(req.params.id, req.body.note);
+      await note.save();
+      res.status(200).send(note);
+    } catch (err) {
+      console.log(date.toLocaleString() + ': Error in updating note: ' + err);
+      res.status(500).send(err);
+    }
   }
 });
 

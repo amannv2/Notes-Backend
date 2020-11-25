@@ -1,6 +1,7 @@
 var bcrypt = require('bcryptjs');
 const express = require('express');
 const userModel = require('../models/userSchema');
+const common = require('../common');
 
 const app = express();
 
@@ -46,21 +47,11 @@ app.post('/user/:name', async (req, res) => {
   const name = req.params.name.trim();
   const pass = req.body.pass.trim();
 
-  try {
-    const user = await userModel.find({ username: name });
-
-    console.log(date.toLocaleString() + ': Authenticating user ' + name);
-
-    if (user[0].username === name) {
-      const result = await bcrypt.compare(pass, user[0].password);
-      if (result) {
-        response.status = true;
-      }
-    }
+  if ((await common.authenticate(name, pass)) === true) {
+    response.status = true;
     res.send(response);
-  } catch (err) {
-    console.log(date.toLocaleString() + ': User does not exists with name ' + name + '.');
-    res.status(200).send(response);
+  } else {
+    res.status(401).send(response);
   }
 });
 
