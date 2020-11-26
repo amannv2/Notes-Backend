@@ -37,6 +37,7 @@ app.post('/note/:user', async (req, res) => {
   } else {
     try {
       console.log(date.toLocaleString() + ': Adding a new note: ' + note._id);
+      note.id = note._id;
       await note.save();
       res.send(note);
     } catch (err) {
