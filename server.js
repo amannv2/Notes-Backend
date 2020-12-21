@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const noteRouter = require('./routes/noteRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
+const reminderRouter = require('./routes/reminderRoutes.js');
 
 const conString = process.env.conString;
 
@@ -21,6 +22,7 @@ mongoose.connect(conString, {
 
 app.use(noteRouter);
 app.use(userRouter);
+app.use(reminderRouter);
 
 app.listen(3000, () => {
   console.log('Server is running...');
