@@ -1,6 +1,6 @@
 const express = require('express');
 const common = require('../common');
-const reminderModel = require('../models/reminderschema');
+const reminderModel = require('../models/reminderSchema');
 
 const app = express();
 
